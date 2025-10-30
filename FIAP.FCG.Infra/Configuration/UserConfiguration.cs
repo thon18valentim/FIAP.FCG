@@ -13,7 +13,7 @@ namespace FIAP.FCG.Infra.Configuration
 			builder.Property(p => p.Id).HasColumnType("INT").UseIdentityColumn();
 			builder.Property(p => p.Name).HasColumnType("VARCHAR(100)").IsRequired();
 			builder.Property(p => p.Email).HasColumnType("VARCHAR(50)").IsRequired();
-			builder.Property(p => p.Password).HasColumnType("VARCHAR(20)").IsRequired();
+			builder.Property(p => p.Password).HasColumnType("VARCHAR(64)").IsRequired();
 			builder.Property(p => p.IsAdmin).HasColumnType("BIT").IsRequired();
 		}
 	}

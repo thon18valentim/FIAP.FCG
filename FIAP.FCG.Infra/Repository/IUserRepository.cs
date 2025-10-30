@@ -1,9 +1,10 @@
-﻿using FIAP.FCG.Core.Models;
+﻿using FIAP.FCG.Core.Inputs;
 
 namespace FIAP.FCG.Infra.Repository
 {
 	public interface IUserRepository
 	{
-		List<User> GetAll();
+		List<UserRegisterDto.UserRegisterResponseDto> GetAll();
+		void Add(UserRegisterDto.UserRegisterRequestDto dto);
 	}
 }
