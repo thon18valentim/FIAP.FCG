@@ -1,25 +1,23 @@
-﻿using FIAP.FCG.Infra.Repository;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using FIAP.FCG.Core.Inputs;
+using FIAP.FCG.Application.Services;
 
 namespace FIAP.FCG.WebApi.Controllers.v1
 {
-	[ApiController]
-	[Route("v1/[controller]")]
-	public class UserController(IUserRepository repository) : ControllerBase
+	public class UserController(IUserService service, ILogger<UserController> logger) : StandardController
 	{
 		[HttpGet]
 		public IActionResult Get()
 		{
-			var users = repository.GetAll();
-			return Ok(users);
+			logger.LogInformation("GET - Listar usuários");
+			return TryMethod(service.GetAll, logger);
 		}
 
-        [HttpPost]
+		[HttpPost]
         public IActionResult Post([FromBody] UserRegisterDto.UserRegisterRequestDto userRegisterRequestDto)
         {
-            repository.Add(userRegisterRequestDto);
-            return Ok();
+			logger.LogInformation("POST - Adicionar novo usuário");
+			return TryMethod(() => service.Add(userRegisterRequestDto), logger);
         }
     }
 }

@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FIAP.FCG.Application\FIAP.FCG.Application.csproj" />
     <ProjectReference Include="..\FIAP.FCG.Core\FIAP.FCG.Core.csproj" />
     <ProjectReference Include="..\FIAP.FCG.Infra\FIAP.FCG.Infra.csproj" />
   </ItemGroup>
