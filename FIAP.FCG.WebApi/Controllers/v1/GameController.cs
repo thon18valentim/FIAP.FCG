@@ -8,10 +8,10 @@ namespace FIAP.FCG.WebApi.Controllers.v1
 	public class GameController(IGameService service, ILogger<GameController> logger) : StandardController
 	{
 		[HttpGet]
-		public IActionResult Get()
+		public Task<IActionResult> Get()
 		{
 			logger.LogInformation("GET - Listar jogos");
-			return TryMethod(service.GetAll, logger);
+			return TryMethodAsync(() => service.GetAll(), logger);
 		}
 	}
 }

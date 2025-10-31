@@ -1,9 +1,12 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+
 namespace FIAP.FCG.Core.Inputs
 {
-	public class LoginDto
+	public sealed record class LoginDto
 	{
-		public required string UserName { get; set; }
+		[EmailAddress]
+		public required string Email { get; set; }
 		public required string Password { get; set; }
 	}
 }

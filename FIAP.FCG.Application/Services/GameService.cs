@@ -6,9 +6,7 @@ namespace FIAP.FCG.Application.Services
 {
 	public class GameService(IGameRepository repository) : BaseService, IGameService
 	{
-		public IApiResponse<List<Game>> GetAll()
-		{
-			return Success(repository.GetAll());
-		}
+		public async Task<IApiResponse<IEnumerable<Game>>> GetAll() => Success(await repository.GetAll());
+
 	}
 }

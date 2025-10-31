@@ -5,6 +5,6 @@ namespace FIAP.FCG.Application.Services
 {
 	public interface IGameService
 	{
-		IApiResponse<List<Game>> GetAll();
+		Task<IApiResponse<IEnumerable<Game>>> GetAll();
 	}
 }

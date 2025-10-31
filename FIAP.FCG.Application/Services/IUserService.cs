@@ -5,7 +5,9 @@ namespace FIAP.FCG.Application.Services
 {
 	public interface IUserService
 	{
-		IApiResponse<List<UserRegisterDto.UserRegisterResponseDto>> GetAll();
-		IApiResponse<bool> Add(UserRegisterDto.UserRegisterRequestDto dto);
-	}
+		Task<IApiResponse<IEnumerable<UserResponseDto>>> GetAll();
+        Task<IApiResponse<UserResponseDto?>> GetById(int id);
+        Task<IApiResponse<bool>> Update(int id, UserUpdateDto userUpdateDto);
+        Task<IApiResponse<bool>> Remove(int id);
+    }
 }
