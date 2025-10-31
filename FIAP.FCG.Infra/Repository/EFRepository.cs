@@ -1,6 +1,7 @@
 ﻿using FIAP.FCG.Core.Models;
 using FIAP.FCG.Infra.Context;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace FIAP.FCG.Infra.Repository
 {
@@ -15,32 +16,30 @@ namespace FIAP.FCG.Infra.Repository
 			_dbSet = _context.Set<T>();
 		}
 
-		public void Edit(T entity)
+		public async Task<bool> Edit(T entity)
 		{
 			_dbSet.Update(entity);
-			_context.SaveChanges();
+			await _context.SaveChangesAsync();
+			return true;
 		}
 
-		public void Register(T entity)
+		public async Task<bool> Register(T entity)
 		{
 			_dbSet.Add(entity);
-			_context.SaveChanges();
+			await _context.SaveChangesAsync();
+            return true;
+        }
+
+		public async Task<bool> Delete(int id)
+		{
+			var entity = await Get(id) ?? throw new ArgumentNullException(nameof(id), $"Erro ao deletar: Entidade inexistente!");
+            _dbSet.Remove(entity);
+			await _context.SaveChangesAsync();
+			return true;
 		}
 
-		public void Delete(int id)
-		{
-			_dbSet.Remove(Get(id));
-			_context.SaveChanges();
-		}
+		public async Task<T?> Get(int id) => await _dbSet.FirstOrDefaultAsync(entity => entity.Id == id);
 
-		public T Get(int id)
-		{
-			return _dbSet.FirstOrDefault(entity => entity.Id == id);
-		}
-
-		public IList<T> Get()
-		{
-			return _dbSet.ToList();
-		}
-	}
+		public async Task<IEnumerable<T>> Get() => await _dbSet.ToListAsync();
+    }
 }

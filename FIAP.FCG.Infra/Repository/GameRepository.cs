@@ -5,9 +5,9 @@ namespace FIAP.FCG.Infra.Repository
 {
 	public class GameRepository(ApplicationDbContext context) : EFRepository<Game>(context), IGameRepository
 	{
-		public List<Game> GetAll()
+		public async Task<IEnumerable<Game>> GetAll()
 		{
-			return [.. Get()];
+			return [.. await Get()];
 		}
-	}
+    }
 }

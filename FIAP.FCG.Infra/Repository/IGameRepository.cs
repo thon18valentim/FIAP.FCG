@@ -4,6 +4,6 @@ namespace FIAP.FCG.Infra.Repository
 {
 	public interface IGameRepository
 	{
-		List<Game> GetAll();
+        Task<IEnumerable<Game>> GetAll();
 	}
 }

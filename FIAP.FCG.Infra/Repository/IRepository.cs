@@ -4,10 +4,10 @@ namespace FIAP.FCG.Infra.Repository
 {
 	public interface IRepository<T> where T : EntityBase
 	{
-		IList<T> Get();
-		T Get(int id);
-		void Register(T entity);
-		void Edit(T entity);
-		void Delete(int id);
+		Task<IEnumerable<T>> Get();
+		Task<T?> Get(int id);
+		Task<bool> Register(T entity);
+		Task<bool> Edit(T entity);
+		Task<bool> Delete(int id);
 	}
 }
