@@ -1,14 +1,7 @@
 ﻿using AutoMapper;
 using FIAP.FCG.Core.Inputs;
-using AutoMapper;
-using FIAP.FCG.Core.Inputs;
 using FIAP.FCG.Core.Models;
-using FIAP.FCG.Core.Validation;
 using FIAP.FCG.Infra.Context;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace FIAP.FCG.Infra.Repository
 {
