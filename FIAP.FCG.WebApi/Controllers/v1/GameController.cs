@@ -1,10 +1,10 @@
 ﻿using FIAP.FCG.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FIAP.FCG.WebApi.Controllers.v1
 {
-	[ApiController]
-	[Route("v1/[controller]")]
+	[Authorize]
 	public class GameController(IGameService service, ILogger<GameController> logger) : StandardController
 	{
 		[HttpGet]

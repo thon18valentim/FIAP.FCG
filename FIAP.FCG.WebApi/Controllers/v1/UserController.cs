@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using FIAP.FCG.Core.Inputs;
 using FIAP.FCG.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FIAP.FCG.WebApi.Controllers.v1
 {
+	[Authorize]
 	public class UserController(IUserService service, ILogger<UserController> logger) : StandardController
 	{
 		[HttpGet]

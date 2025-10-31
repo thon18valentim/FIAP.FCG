@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\FIAP.FCG.Core\FIAP.FCG.Core.csproj" />
     <ProjectReference Include="..\FIAP.FCG.Infra\FIAP.FCG.Infra.csproj" />
   </ItemGroup>
