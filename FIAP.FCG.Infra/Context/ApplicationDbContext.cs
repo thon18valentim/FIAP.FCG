@@ -25,8 +25,8 @@ namespace FIAP.FCG.Infra.Context
 			_connectinoString = connectionString;
 		}
 
-		public DbSet<User> User { get; set; }
-		public DbSet<Game> Game { get; set; }
+		public DbSet<User> Users { get; set; }
+		public DbSet<Game> Games { get; set; }
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{

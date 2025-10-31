@@ -29,11 +29,12 @@ namespace FIAP.FCG.Infra.Repository
 
 		public void Delete(int id)
 		{
-			_dbSet.Remove(Get(id));
+			var entity = Get(id) ?? throw new ArgumentNullException(nameof(id), $"Erro ao deletar: Entidade inexistente!");
+            _dbSet.Remove(entity);
 			_context.SaveChanges();
 		}
 
-		public T Get(int id)
+		public T? Get(int id)
 		{
 			return _dbSet.FirstOrDefault(entity => entity.Id == id);
 		}

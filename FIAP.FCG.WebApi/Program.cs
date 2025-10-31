@@ -1,6 +1,9 @@
+using AutoMapper;
 using FIAP.FCG.Infra.Context;
+using FIAP.FCG.Infra.Mapping;
 using FIAP.FCG.Infra.Repository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +22,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IGameRepository, GameRepository>();
+
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<UsersProfile>();
+});
 
 var app = builder.Build();
 
