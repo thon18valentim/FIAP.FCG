@@ -7,6 +7,6 @@ namespace FIAP.FCG.Application.Auth
 	public interface IAuthService
 	{
 		Task<IApiResponse<string>> Login(LoginDto dto);
-        Task<IApiResponse<HttpStatusCode>> Register(UserRegisterDto dto);
+        Task<IApiResponse<int>> Register(UserRegisterDto dto);
     }
 }

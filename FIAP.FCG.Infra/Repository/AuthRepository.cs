@@ -19,7 +19,7 @@ namespace FIAP.FCG.Infra.Repository
     {
         private readonly IMapper _mapper = mapper;
 
-        public async Task<HttpStatusCode> Add(UserRegisterDto dto)
+        public async Task<int> Add(UserRegisterDto dto)
         {
             DtoValidator.ValidateObject(dto);
 
@@ -34,17 +34,14 @@ namespace FIAP.FCG.Infra.Repository
             entity.Password = HashPassword(dto.Password);
 
             await Register(entity);
-
-            return HttpStatusCode.Created;
+            return entity.Id;
         }
 
-        public async Task<string> Login(LoginDto dto, IConfiguration configuration)
+        public async Task<User?> FindByCredentialsAsync(LoginDto dto)
         {
             var hashedPassword = HashPassword(dto.Password);
-            var user = await _dbSet.AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Email == dto.Email && u.Password == hashedPassword)
-                ?? throw new ValidationException("Credenciais inválidas.");
-            return GenerateToken(configuration);
+            return await _dbSet.AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Email == dto.Email && u.Password == hashedPassword);
         }
 
         public static string HashPassword(string raw)
@@ -53,7 +50,12 @@ namespace FIAP.FCG.Infra.Repository
             return Convert.ToHexString(bytes);
         }
 
-        private static string GenerateToken(IConfiguration configuration)
+        public string GenerateToken(IConfiguration configuration)
+        {
+            return GenerateTokenPrivate(configuration);
+        }
+
+        private static string GenerateTokenPrivate(IConfiguration configuration)
         {
             var secretKey = configuration["Jwt:Key"];
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!));

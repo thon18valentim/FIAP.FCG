@@ -11,20 +11,26 @@ using System.Text;
 
 namespace FIAP.FCG.Application.Auth
 {
-	public class AuthService(IConfiguration configuration, IAuthRepository repository) : BaseService, IAuthService
+	public class AuthService(IAuthRepository repo, IConfiguration config) : BaseService, IAuthService
 	{
-		public async Task<IApiResponse<string>> Login(LoginDto dto)
+        private readonly IAuthRepository _repository = repo;
+        private readonly IConfiguration _configuration = config;
+
+        public async Task<IApiResponse<string>> Login(LoginDto dto)
 		{
+			var user = await _repository.FindByCredentialsAsync(dto);
+            if (user == null)
+            {
+                return Unauthorized<string>("Credenciais inválidas.");
+            }
+			var token = _repository.GenerateToken(_configuration);
+            return Ok(token);
+        }
 
-			return Success(await repository.Login(dto, configuration), "Login realizado com sucesso");
-		}
-
-        public async Task<IApiResponse<HttpStatusCode>> Register(UserRegisterDto dto) => Success(await repository.Add(dto), "Usuário cadastrado com sucesso");
-
-        #region private ::
-
-        
-
-		#endregion
+        public async Task<IApiResponse<int>> Register(UserRegisterDto dto) 
+        { 
+            var id = await _repository.Add(dto);
+            return Created(id, "Usuário registrado com sucesso.");
+        }
 	}
 }

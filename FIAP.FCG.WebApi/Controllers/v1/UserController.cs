@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using FIAP.FCG.Core.Inputs;
-using System.ComponentModel;
-using FIAP.FCG.Core.Inputs;
 using FIAP.FCG.Application.Services;
+using FIAP.FCG.Core.Inputs;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FIAP.FCG.WebApi.Controllers.v1
 {
@@ -27,7 +25,7 @@ namespace FIAP.FCG.WebApi.Controllers.v1
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get(int id)
         {
-            logger.LogInformation($"GET BY ID - Listar usuário de ID: {id}");
+            logger.LogInformation("GET BY ID - Listar usuário de ID: {Id}", id);
             return await TryMethodAsync(() => service.GetById(id), logger);
         }
 
@@ -40,7 +38,7 @@ namespace FIAP.FCG.WebApi.Controllers.v1
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Update(int id, [FromBody] UserUpdateDto dto)
         {
-            logger.LogInformation($"PUT - Atualizar usuário de ID: {id}");
+            logger.LogInformation("PUT - Atualizar usuário de ID: {Id}", id);
             return await TryMethodAsync(() => service.Update(id, dto), logger);
         }
 
@@ -52,7 +50,7 @@ namespace FIAP.FCG.WebApi.Controllers.v1
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Remove(int id)
         {
-            logger.LogInformation($"DELETE - Remover usuário de ID: {id}");
+            logger.LogInformation("DELETE - Remover usuário de ID: {Id}", id);
             return await TryMethodAsync(() => service.Remove(id), logger);
         }
 	}

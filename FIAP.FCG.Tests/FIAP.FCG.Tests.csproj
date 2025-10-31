@@ -10,8 +10,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="15.1.0" />
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="FluentAssertions" Version="8.8.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.21" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.21">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.21" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.21" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
@@ -21,8 +31,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Application\Auth\" />
     <Folder Include="Game\" />
     <Folder Include="User\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FIAP.FCG.Application\FIAP.FCG.Application.csproj" />
+    <ProjectReference Include="..\FIAP.FCG.Core\FIAP.FCG.Core.csproj" />
+    <ProjectReference Include="..\FIAP.FCG.Infra\FIAP.FCG.Infra.csproj" />
+    <ProjectReference Include="..\FIAP.FCG.WebApi\FIAP.FCG.WebApi.csproj" />
   </ItemGroup>
 
 </Project>

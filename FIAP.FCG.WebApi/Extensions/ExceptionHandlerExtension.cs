@@ -27,7 +27,7 @@ namespace FIAP.FCG.WebApi.Extensions
                     var problem = new ProblemDetails
                     {
                         Title = "Erro ao processar a requisição",
-                        Instance = context.Request.Path,
+                        Instance = context.Request?.Path,
                     };
 
                     switch (ex)
