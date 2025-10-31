@@ -1,23 +1,30 @@
-﻿using FIAP.FCG.Infra.Repository;
 using Microsoft.AspNetCore.Mvc;
 using FIAP.FCG.Core.Inputs;
 using System.ComponentModel;
+using FIAP.FCG.Core.Inputs;
+using FIAP.FCG.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FIAP.FCG.WebApi.Controllers.v1
 {
-	[ApiController]
-	[Route("v1/[controller]")]
-	public class UserController(IUserRepository repository) : ControllerBase
-	{
-		[HttpGet("GetAllUsers")]
+    [Authorize]
+    public class UserController(IUserService service, ILogger<UserController> logger) : StandardController
+    {
+        [HttpPost]
+        public IActionResult Post([FromBody] UserRegisterDto.UserRegisterRequestDto userRegisterRequestDto)
+        {
+            logger.LogInformation("POST - Adicionar novo usuário");
+            return TryMethod(() => service.Add(userRegisterRequestDto), logger);
+        }
+        
+        [HttpGet("GetAllUsers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get()
-		{
-			var users = await repository.GetAll();
-			return Ok(users);
-		}
-
+        {
+            logger.LogInformation("GET - Listar usuários");
+            return TryMethod(service.GetAll, logger);
+        }
         [HttpGet("GetUserById/{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -50,5 +57,5 @@ namespace FIAP.FCG.WebApi.Controllers.v1
             await repository.Remove(id);
             return NoContent();
         }
-    }
+	}
 }

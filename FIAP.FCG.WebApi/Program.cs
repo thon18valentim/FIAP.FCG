@@ -1,7 +1,14 @@
+using FIAP.FCG.Application.Auth;
+using FIAP.FCG.Application.Services;
 using FIAP.FCG.Infra.Context;
+using FIAP.FCG.Infra.Mapping;
 using FIAP.FCG.Infra.Repository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using FIAP.FCG.WebApi.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +19,37 @@ builder.Services.AddProblemDetails();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+	c.SwaggerDoc("v1", new OpenApiInfo
+	{
+		Title = "FIAP Cloud Games",
+		Version = "v1"
+	});
+	c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+	{
+		Name = "JWT Authentication",
+		Type = SecuritySchemeType.Http,
+		Scheme = JwtBearerDefaults.AuthenticationScheme,
+		BearerFormat = "JWT",
+		In = ParameterLocation.Header,
+		Description = "Insira o token JWT"
+	});
+	c.AddSecurityRequirement(new OpenApiSecurityRequirement
+	{
+		{
+			new OpenApiSecurityScheme
+			{
+				Reference = new OpenApiReference
+				{
+					Type = ReferenceType.SecurityScheme,
+					Id = JwtBearerDefaults.AuthenticationScheme
+				}
+			},
+			[]
+		}
+	});
+});
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -23,6 +60,34 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IGameRepository, GameRepository>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IGameService, GameService>();
+
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<UsersProfile>();
+});
+
+// JWT Settings
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+	.AddJwtBearer(opt =>
+	{
+		opt.RequireHttpsMetadata = false;
+		opt.TokenValidationParameters = new TokenValidationParameters
+		{
+			ValidateIssuer = true,
+			ValidateAudience = true,
+			ValidateLifetime = true,
+			ClockSkew = TimeSpan.Zero,
+
+			ValidIssuer = builder.Configuration["Jwt:Issuer"],
+			ValidAudience = builder.Configuration["Jwt:Audience"],
+			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+		};
+	});
 
 var app = builder.Build();
 
@@ -36,9 +101,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

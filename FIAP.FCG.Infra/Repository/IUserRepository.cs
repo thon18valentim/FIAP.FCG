@@ -1,4 +1,4 @@
-﻿using FIAP.FCG.Core.Models;
+﻿using FIAP.FCG.Core.Inputs;
 
 namespace FIAP.FCG.Infra.Repository
 {

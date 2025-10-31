@@ -1,17 +1,17 @@
-﻿using FIAP.FCG.Infra.Repository;
+﻿using FIAP.FCG.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FIAP.FCG.WebApi.Controllers.v1
 {
-	[ApiController]
-	[Route("v1/[controller]")]
-	public class GameController(IGameRepository repository) : ControllerBase
+	[Authorize]
+	public class GameController(IGameService service, ILogger<GameController> logger) : StandardController
 	{
 		[HttpGet]
 		public IActionResult Get()
 		{
-			var games = repository.GetAll();
-			return Ok(games);
+			logger.LogInformation("GET - Listar jogos");
+			return TryMethod(service.GetAll, logger);
 		}
 	}
 }
