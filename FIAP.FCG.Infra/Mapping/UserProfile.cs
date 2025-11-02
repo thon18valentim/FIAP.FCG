@@ -4,9 +4,9 @@ using FIAP.FCG.Core.Models;
 
 namespace FIAP.FCG.Infra.Mapping;
 
-public class UsersProfile : Profile
+public class UserProfile : Profile
 {
-    public UsersProfile()
+    public UserProfile()
     {
         // REGISTER: DTO -> Entity
         CreateMap<UserRegisterDto, User>()

@@ -1,6 +1,8 @@
 ﻿using FIAP.FCG.Core.Web;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
+using Microsoft.EntityFrameworkCore;
 
 namespace FIAP.FCG.WebApi.Controllers.v1
 {
@@ -25,16 +27,38 @@ namespace FIAP.FCG.WebApi.Controllers.v1
 
                 return StatusCode((int)result.StatusCode, result);
             }
+            // ✅ mapeia erros conhecidos COM a mensagem real
+            catch (ValidationException ex)
+            {
+                logger.LogWarning(ex, ex.Message);
+                return CreateProblem(HttpStatusCode.BadRequest, ex);
+            }
+            catch (ArgumentException ex)
+            {
+                logger.LogWarning(ex, ex.Message);
+                return CreateProblem(HttpStatusCode.BadRequest, ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                logger.LogWarning(ex, ex.Message);
+                return CreateProblem(HttpStatusCode.Unauthorized, ex);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                logger.LogWarning(ex, ex.Message);
+                return CreateProblem(HttpStatusCode.NotFound, ex);
+            }
+            catch (DbUpdateException ex)
+            {
+                logger.LogError(ex, ex.Message);
+                // Conflito de integridade, chave única, FK, etc.
+                return CreateProblem(HttpStatusCode.Conflict, ex);
+            }
+            // ✅ fallback genérico mantém seu comportamento atual
             catch (Exception ex)
             {
                 logger.LogError(ex, "Erro inesperado no TryMethodAsync");
-                var problem = new ProblemDetails
-                {
-                    Status = (int)HttpStatusCode.InternalServerError,
-                    Title = "Erro interno no servidor",
-                    Detail = "Ocorreu um erro inesperado ao processar sua requisição."
-                };
-                return StatusCode(problem.Status.Value, problem);
+                return CreateProblem(HttpStatusCode.InternalServerError, ex, genericOnProd: true);
             }
         }
 
@@ -54,17 +78,51 @@ namespace FIAP.FCG.WebApi.Controllers.v1
 
                 return StatusCode((int)result.StatusCode, result);
             }
+            catch (ValidationException ex)
+            {
+                logger.LogWarning(ex, ex.Message);
+                return CreateProblem(HttpStatusCode.BadRequest, ex);
+            }
+            catch (ArgumentException ex)
+            {
+                logger.LogWarning(ex, ex.Message);
+                return CreateProblem(HttpStatusCode.BadRequest, ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                logger.LogWarning(ex, ex.Message);
+                return CreateProblem(HttpStatusCode.Unauthorized, ex);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                logger.LogWarning(ex, ex.Message);
+                return CreateProblem(HttpStatusCode.NotFound, ex);
+            }
+            catch (DbUpdateException ex)
+            {
+                logger.LogError(ex, ex.Message);
+                return CreateProblem(HttpStatusCode.Conflict, ex);
+            }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Erro inesperado no TryMethod");
-                var problem = new ProblemDetails
-                {
-                    Status = (int)HttpStatusCode.InternalServerError,
-                    Title = "Erro interno no servidor",
-                    Detail = "Ocorreu um erro inesperado ao processar sua requisição."
-                };
-                return StatusCode(problem.Status.Value, problem);
+                return CreateProblem(HttpStatusCode.InternalServerError, ex, genericOnProd: true);
             }
+        }
+
+        private IActionResult CreateProblem(HttpStatusCode code, Exception ex, bool genericOnProd = false)
+        {
+            var problem = new ProblemDetails
+            {
+                Status = (int)code,
+                Title = ToDefaultTitle(code),
+                Detail = ex.Message
+            };
+
+            // útil para correlação em logs
+            problem.Extensions["traceId"] = HttpContext?.TraceIdentifier;
+
+            return StatusCode(problem.Status.Value, problem);
         }
 
         private static string ToDefaultTitle(HttpStatusCode code) => code switch

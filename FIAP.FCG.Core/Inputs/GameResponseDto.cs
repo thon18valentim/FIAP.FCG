@@ -4,6 +4,8 @@
         int Id,
         string Name,
         string Platform,
+        string PublisherName,
+        string Description,
         double Price,
         DateTime CreatedAtUtc
         );

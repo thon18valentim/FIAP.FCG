@@ -1,5 +1,6 @@
 ﻿using FIAP.FCG.Application.Services;
 using FIAP.FCG.Core.Inputs;
+using FIAP.FCG.Core.Validation;
 using FIAP.FCG.Core.Web;
 using FIAP.FCG.Infra.Repository;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +19,8 @@ namespace FIAP.FCG.Application.Auth
 
         public async Task<IApiResponse<string>> Login(LoginDto dto)
 		{
-			var user = await _repository.FindByCredentialsAsync(dto);
+            DtoValidator.ValidateObject(dto);
+            var user = await _repository.FindByCredentialsAsync(dto);
             if (user == null)
             {
                 return Unauthorized<string>("Credenciais inválidas.");
@@ -28,8 +30,9 @@ namespace FIAP.FCG.Application.Auth
         }
 
         public async Task<IApiResponse<int>> Register(UserRegisterDto dto) 
-        { 
-            var id = await _repository.Add(dto);
+        {
+            DtoValidator.ValidateObject(dto);
+            var id = await _repository.Create(dto);
             return Created(id, "Usuário registrado com sucesso.");
         }
 	}

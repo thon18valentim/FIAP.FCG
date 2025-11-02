@@ -10,9 +10,9 @@ namespace FIAP.FCG.WebApi.Controllers.v1
 	public class AuthController(IAuthService service, ILogger<AuthController> logger) : StandardController
 	{
 		[HttpPost("login")]
-		public async Task<IActionResult> Login(LoginDto dto)
+		public async Task<IActionResult> Login(LoginDto loginDto)
 		{
-			return await TryMethodAsync(() => service.Login(dto), logger);
+			return await TryMethodAsync(() => service.Login(loginDto), logger);
 		}
 
         [HttpPost("Register")]
@@ -22,12 +22,13 @@ namespace FIAP.FCG.WebApi.Controllers.v1
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Register([FromBody] UserRegisterDto userRegisterRequestDto)
         {
-            var response = await service.Register(userRegisterRequestDto);
+            //var response = await service.Register(userRegisterRequestDto);
 
-            if (response.StatusCode == HttpStatusCode.Created)
-                return Created(string.Empty, "Usuário cadastrado com sucesso!");
+            //if (response.StatusCode == HttpStatusCode.Created)
+            //    return Created(string.Empty, $"Usuário {response.ResultValue} cadastrado com sucesso!");
 
-            return StatusCode((int)response.StatusCode);
+            //return StatusCode((int)response.StatusCode);
+            return await TryMethodAsync(() => service.Register(userRegisterRequestDto), logger);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FIAP.FCG.Core.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace FIAP.FCG.Core.Inputs
 {
@@ -14,6 +15,7 @@ namespace FIAP.FCG.Core.Inputs
         public string Address { get; init; } = default!;
     
         [Required, RegularExpression(@"^\d{11}$", ErrorMessage = "CPF deve ter 11 dígitos numéricos.")]
+        [CustomValidation(typeof(ValidaCpf), nameof(ValidaCpf.ValidarCpf))]
         public string Cpf { get; init; } = default!;
     
         [Required, RegularExpression(@"^(?=.*[A-Z])(?=(?:.*\d){3,})(?=.*[^\w\s])\S{8,}$",

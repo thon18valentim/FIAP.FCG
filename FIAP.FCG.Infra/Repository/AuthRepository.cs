@@ -19,10 +19,8 @@ namespace FIAP.FCG.Infra.Repository
     {
         private readonly IMapper _mapper = mapper;
 
-        public async Task<int> Add(UserRegisterDto dto)
+        public async Task<int> Create(UserRegisterDto dto)
         {
-            DtoValidator.ValidateObject(dto);
-
             if (await _dbSet.AsNoTracking().AnyAsync(u => u.Email == dto.Email))
                 throw new ValidationException("E-mail já cadastrado.");
 

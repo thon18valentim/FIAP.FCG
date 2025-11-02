@@ -67,7 +67,8 @@ builder.Services.AddScoped<IGameService, GameService>();
 
 builder.Services.AddAutoMapper(cfg =>
 {
-    cfg.AddProfile<UsersProfile>();
+    cfg.AddProfile<UserProfile>();
+	cfg.AddProfile<GameProfile>();
 });
 
 // JWT Settings

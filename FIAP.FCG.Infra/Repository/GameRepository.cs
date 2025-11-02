@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
 using FIAP.FCG.Core.Inputs;
 using FIAP.FCG.Core.Models;
+using FIAP.FCG.Core.Validation;
 using FIAP.FCG.Infra.Context;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace FIAP.FCG.Infra.Repository
 {
@@ -9,16 +12,23 @@ namespace FIAP.FCG.Infra.Repository
 	{
 		private readonly IMapper _mapper = mapper;
 
-        public async Task<GameRegisterDto> Create(GameRegisterDto gameRegister)
+        public async Task<int> Create(GameRegisterDto gameRegister)
         {
-            var game = await Create(gameRegister);
-            return _mapper.Map<GameRegisterDto>(game);
+            DtoValidator.ValidateObject(gameRegister);
+
+            if (await _dbSet.AsNoTracking().AnyAsync(u => u.Name == gameRegister.Name))
+                throw new ValidationException("Jogo já cadastrado.");
+
+            var entity = _mapper.Map<Game>(gameRegister);
+
+            await Register(entity);
+            return entity.Id;
         }
 
         public async Task<IEnumerable<GameResponseDto>> GetAll()
 		{
 			var games =  await Get();
-            return [.. games.Select(g => _mapper.Map<GameResponseDto>(games))];
+            return [.. games.Select(g => _mapper.Map<GameResponseDto>(g))];
         }
 
         public async Task<GameResponseDto?> GetById(int id)

@@ -5,9 +5,9 @@ namespace FIAP.FCG.Infra.Repository
 {
 	public interface IGameRepository
 	{
-		Task<GameRegisterDto> Create(GameRegisterDto gameRegister);
+		Task<int> Create(GameRegisterDto gameRegister);
         Task<IEnumerable<GameResponseDto>> GetAll();
-		Task<GameResponseDto> GetById(int id);
+		Task<GameResponseDto?> GetById(int id);
 		Task<bool> Update(int id, GameUpdateDto gameUpdateDto);
 		Task<bool> Remove(int id);
 

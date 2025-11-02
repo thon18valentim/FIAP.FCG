@@ -12,7 +12,8 @@ namespace FIAP.FCG.Tests.Infrastructure
             var cfg = new MapperConfiguration(exp =>
             {
                 foreach (var p in profiles) exp.AddProfile(p);
-                    exp.AddProfile(new UsersProfile());
+                    exp.AddProfile(new UserProfile());
+                    exp.AddProfile(new GameProfile());
                 // Se não tiver Profiles: configurar maps mínimos aqui
                 // exp.CreateMap<UserRegisterDto, User>();
             }, loggerFactory);

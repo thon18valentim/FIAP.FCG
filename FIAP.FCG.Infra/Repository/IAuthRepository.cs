@@ -7,7 +7,7 @@ namespace FIAP.FCG.Infra.Repository
 {
     public interface IAuthRepository
     {
-        Task<int> Add(UserRegisterDto dto);
+        Task<int> Create(UserRegisterDto dto);
         Task<User?> FindByCredentialsAsync(LoginDto dto);
         string GenerateToken(IConfiguration configuration);
     }

@@ -1,5 +1,6 @@
 ﻿using FIAP.FCG.Core.Inputs;
 using FIAP.FCG.Core.Models;
+using FIAP.FCG.Core.Validation;
 using FIAP.FCG.Core.Web;
 using FIAP.FCG.Infra.Repository;
 
@@ -7,15 +8,39 @@ namespace FIAP.FCG.Application.Services
 {
 	public class GameService(IGameRepository repository) : BaseService, IGameService
 	{
-        public async Task<IApiResponse<GameRegisterDto>> Create(GameRegisterDto gameRegister) => Success(await repository.Create(gameRegister));
+        private readonly IGameRepository _repository = repository;
+        public async Task<IApiResponse<int>> Create(GameRegisterDto gameRegisterDto)
+        {
+            DtoValidator.ValidateObject(gameRegisterDto);
+            var id = await _repository.Create(gameRegisterDto);
+            return Created(id, "Jogo registrado com sucesso.");
+        }
 
-        public async Task<IApiResponse<bool>> Remove(int id) => Success(await repository.Remove(id));
+        public async Task<IApiResponse<bool>> Remove(int id)
+        {
+            var removed =  await _repository.Remove(id);
+            return removed
+                ? NoContent()
+                : NotFound<bool>("Jogo não encontrado para remoção.");
+        }
 
-        public async Task<IApiResponse<IEnumerable<GameResponseDto>>> GetAll() => Success(await repository.GetAll());
+        public async Task<IApiResponse<IEnumerable<GameResponseDto>>> GetAll() => Ok(await _repository.GetAll());
 
-        public async Task<IApiResponse<GameResponseDto>> GetById(int id) => Success(await repository.GetById(id));
+        public async Task<IApiResponse<GameResponseDto?>> GetById(int id)
+        {
+            var dto = await _repository.GetById(id);
+            return dto is null
+                ? NotFound<GameResponseDto?>("Jogo não encontrado.")
+                : Ok<GameResponseDto?>(dto);
+        }
 
-        public async Task<IApiResponse<bool>> Update(int id, GameUpdateDto update) => Success(await repository.Update(id, update));
+        public async Task<IApiResponse<bool>> Update(int id, GameUpdateDto updateDto)
+        {
+            var ok = await _repository.Update(id, updateDto);
+            return ok
+                ? NoContent()
+                : NotFound<bool>("Usuário não encontrado para atualização.");
+        }
 
     }
 }
