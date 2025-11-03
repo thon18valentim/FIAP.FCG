@@ -74,17 +74,19 @@ public class AuthServiceTests
 
         _repo.Verify(r => r.Create(It.IsAny<UserRegisterDto>()), Times.Never);
     }
-
     [Fact(DisplayName = "Login → 200 OK com token quando credenciais válidas")]
+
     public async Task Login_Should_Return_Token_On_Success()
     {
         var dto = new LoginDto { Email = "ok@fcg.com", Password = "SenhaForte@123" };
+        var user = UserBuilders.NewEntity(email: dto.Email);
 
-        // Service valida DTO, consulta repo, e pede token ao repo
+        // Return the SAME instance used later
         _repo.Setup(r => r.FindByCredentialsAsync(dto))
-             .ReturnsAsync(UserBuilders.NewEntity());
+             .ReturnsAsync(user);
 
-        _repo.Setup(r => r.GenerateToken(_config))
+        // Match by predicate (or use It.IsAny<User>())
+        _repo.Setup(r => r.GenerateToken(_config, It.Is<User>(u => u.Email == dto.Email)))
              .Returns("header.payload.signature");
 
         IApiResponse<string> resp = await _service.Login(dto);
@@ -94,13 +96,14 @@ public class AuthServiceTests
         resp.ResultValue.Should().Be("header.payload.signature");
 
         _repo.Verify(r => r.FindByCredentialsAsync(dto), Times.Once);
-        _repo.Verify(r => r.GenerateToken(_config), Times.Once);
+        _repo.Verify(r => r.GenerateToken(_config, It.Is<User>(u => u.Email == dto.Email)), Times.Once);
     }
 
     [Fact(DisplayName = "Login → 401 Unauthorized quando credenciais inválidas")]
     public async Task Login_Should_Return_Unauthorized_On_Invalid_Credentials()
     {
         var dto = new LoginDto { Email = "fail@fcg.com", Password = "Errada#123" };
+        var user = UserBuilders.NewEntity(email: dto.Email);
 
         _repo.Setup(r => r.FindByCredentialsAsync(dto))
              .ReturnsAsync((User?)null);
@@ -113,17 +116,18 @@ public class AuthServiceTests
         resp.Message.Should().NotBeNullOrWhiteSpace();
 
         _repo.Verify(r => r.FindByCredentialsAsync(dto), Times.Once);
-        _repo.Verify(r => r.GenerateToken(It.IsAny<IConfiguration>()), Times.Never);
+        _repo.Verify(r => r.GenerateToken(It.IsAny<IConfiguration>(), user), Times.Never);
     }
 
     [Fact(DisplayName = "Login → 400 BadRequest quando DTO inválido (não chama repo)")]
     public async Task Login_Should_Return_BadRequest_When_Dto_Invalid()
     {
         var dto = new LoginDto { Email = "", Password = "" }; // invalidez óbvia
+        var user = UserBuilders.NewEntity(email: dto.Email);
 
         _repo.Setup(r => r.FindByCredentialsAsync(It.IsAny<LoginDto>()))
              .ThrowsAsync(new Exception("NÃO DEVERIA CHAMAR O REPO"));
-        _repo.Setup(r => r.GenerateToken(It.IsAny<IConfiguration>()))
+        _repo.Setup(r => r.GenerateToken(It.IsAny<IConfiguration>(), user))
              .Throws(new Exception("NÃO DEVERIA CHAMAR O REPO"));
 
         IApiResponse<string> resp = await _service.Login(dto);
@@ -134,13 +138,14 @@ public class AuthServiceTests
         resp.Message.Should().NotBeNullOrWhiteSpace();
 
         _repo.Verify(r => r.FindByCredentialsAsync(It.IsAny<LoginDto>()), Times.Never);
-        _repo.Verify(r => r.GenerateToken(It.IsAny<IConfiguration>()), Times.Never);
+        _repo.Verify(r => r.GenerateToken(It.IsAny<IConfiguration>(), user), Times.Never);
     }
 
     [Fact(DisplayName = "Login → Propaga exceção inesperada do repositório")]
     public async Task Login_Should_Propagate_Unexpected_Exception()
     {
         var dto = new LoginDto { Email = "boom@fcg.com", Password = "Qualquer@123" };
+        var user = UserBuilders.NewEntity(email: dto.Email);
 
         _repo.Setup(r => r.FindByCredentialsAsync(dto))
              .ThrowsAsync(new Exception("boom"));
@@ -151,6 +156,6 @@ public class AuthServiceTests
         ex.Message.Should().Be("boom");
 
         _repo.Verify(r => r.FindByCredentialsAsync(dto), Times.Once);
-        _repo.Verify(r => r.GenerateToken(It.IsAny<IConfiguration>()), Times.Never);
+        _repo.Verify(r => r.GenerateToken(It.IsAny<IConfiguration>(), user), Times.Never);
     }
 }

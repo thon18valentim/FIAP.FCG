@@ -9,5 +9,7 @@ namespace FIAP.FCG.Core.Models
 		public required string Cpf { get; set; }
 		public required string Address { get; set; }
 		public required bool IsAdmin { get; set; }
-	}
+
+        public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    }
 }

@@ -9,6 +9,6 @@ namespace FIAP.FCG.Infra.Repository
     {
         Task<int> Create(UserRegisterDto dto);
         Task<User?> FindByCredentialsAsync(LoginDto dto);
-        string GenerateToken(IConfiguration configuration);
+        string GenerateToken(IConfiguration configuration, User user);
     }
 }

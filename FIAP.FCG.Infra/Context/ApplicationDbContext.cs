@@ -27,8 +27,10 @@ namespace FIAP.FCG.Infra.Context
 
 		public DbSet<User> Users { get; set; }
 		public DbSet<Game> Games { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
 
-		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
 			optionsBuilder.UseSqlServer(_connectinoString);
 			optionsBuilder.UseLazyLoadingProxies();

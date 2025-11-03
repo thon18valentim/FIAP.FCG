@@ -12,7 +12,7 @@ namespace FIAP.FCG.WebApi.Controllers.v1
 		[HttpPost("login")]
 		public async Task<IActionResult> Login(LoginDto loginDto)
 		{
-			return await TryMethodAsync(() => service.Login(loginDto), logger);
+            return await TryMethodAsync(() => service.Login(loginDto), logger);
 		}
 
         [HttpPost("Register")]

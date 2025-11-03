@@ -8,6 +8,7 @@ namespace FIAP.FCG.WebApi.Controllers.v1
     [Authorize]
     public class UserController(IUserService service, ILogger<UserController> logger) : StandardController
     {
+        [Authorize(Roles = "Admin")]
         [HttpGet("GetAllUsers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

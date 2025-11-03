@@ -1,15 +1,15 @@
-﻿using FIAP.FCG.Core.Inputs;
-using FIAP.FCG.Core.Models;
-using FIAP.FCG.Core.Validation;
-using FIAP.FCG.Core.Web;
+﻿using System.ComponentModel.DataAnnotations;
 using FIAP.FCG.Infra.Repository;
-using System.ComponentModel.DataAnnotations;
+using FIAP.FCG.Core.Validation;
+using FIAP.FCG.Core.Inputs;
+using FIAP.FCG.Core.Web;
 
 namespace FIAP.FCG.Application.Services
 {
 	public class GameService(IGameRepository repository) : BaseService, IGameService
 	{
         private readonly IGameRepository _repository = repository;
+
         public async Task<IApiResponse<int>> Create(GameRegisterDto gameRegisterDto)
         {
             try
@@ -50,6 +50,5 @@ namespace FIAP.FCG.Application.Services
                 ? NoContent()
                 : NotFound<bool>("Usuário não encontrado para atualização.");
         }
-
     }
 }
