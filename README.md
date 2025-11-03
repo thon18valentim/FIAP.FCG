@@ -101,8 +101,8 @@ Se houver pastas específicas de teste como `Tests.Domain` ou `Tests.Infra`, voc
   <a href="https://github.com/2dsant">
     <img src="https://github.com/2dsant.png" alt="" style="border-radius: 50%; width: 60px; height: 60px; margin: 10%">
   </a>
-  <a href="https://github.com/GilmarPedretti">
-    <img src="https://github.com/GilmarPedretti.png" alt="Gilmar Pedretti" style="border-radius: 50%; width: 60px; height: 60px; margin: 10%">
+  <a href="https://github.com/gilmarpedretti">
+    <img src="https://github.com/gilmarpedretti.png" alt="Gilmar Pedretti" style="border-radius: 50%; width: 60px; height: 60px; margin: 10%">
   </a>
 </div>
 
