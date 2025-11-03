@@ -48,28 +48,52 @@ namespace FIAP.FCG.Infra.Repository
             return Convert.ToHexString(bytes);
         }
 
-        public string GenerateToken(IConfiguration configuration)
+
+        public string GenerateToken(IConfiguration configuration, User user)
         {
-            return GenerateTokenPrivate(configuration);
+            return GenerateTokenPrivate(configuration, user);
         }
 
-        private static string GenerateTokenPrivate(IConfiguration configuration)
+        private static string GenerateTokenPrivate(IConfiguration configuration, User user)
         {
-            var secretKey = configuration["Jwt:Key"];
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!));
+            var key = configuration["Jwt:Key"];
+            var issuer = configuration["Jwt:Issuer"];
+            var audience = configuration["Jwt:Audience"];
+            var expirationStr = configuration["Jwt:Expiration"];
+
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ValidationException("JWT Key is not configured (Jwt:Key).");
+            if (!int.TryParse(expirationStr, out var expirationMinutes))
+                throw new ValidationException("JWT Expiration is not configured or invalid (Jwt:Expiration).");
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new List<Claim>
+            {
+                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new(JwtRegisteredClaimNames.UniqueName, user.Name),
+                new(JwtRegisteredClaimNames.Email, user.Email),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var roleNames = user.UserRoles?.Select(ur => ur.Role.Name).Distinct().ToList() ?? new List<string>();
+
+            if (user.IsAdmin && !roleNames.Contains("Admin", StringComparer.OrdinalIgnoreCase))
+                roleNames.Add("Admin");
+
+            foreach (var role in roleNames)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity([
-                    new Claim(JwtRegisteredClaimNames.Sid, "123"),
-                    new Claim(JwtRegisteredClaimNames.NameId, "username"),
-                    new Claim(JwtRegisteredClaimNames.Email, "user@mail.com")
-                    ]),
-                Expires = DateTime.Now.AddMinutes(int.Parse(configuration["Jwt:Expiration"]!)),
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(expirationMinutes),
                 SigningCredentials = credentials,
-                Issuer = configuration["Jwt:Issuer"],
-                Audience = configuration["Jwt:Audience"]
+                Issuer = issuer,
+                Audience = audience
             };
 
             var handler = new JsonWebTokenHandler();

@@ -8,6 +8,7 @@ namespace FIAP.FCG.WebApi.Controllers.v1
     [Authorize]
     public class GameController(IGameService service, ILogger<GameController> logger) : StandardController
     {
+        [Authorize(Roles = "Admin")]
         [HttpPost("RegisterGame")]
         public Task<IActionResult> Post([FromBody] GameRegisterDto register)
         {
@@ -16,6 +17,7 @@ namespace FIAP.FCG.WebApi.Controllers.v1
         }
 
         [HttpGet("GetAllGames")]
+        [AllowAnonymous]
         public Task<IActionResult> Get()
         {
             try
@@ -29,6 +31,7 @@ namespace FIAP.FCG.WebApi.Controllers.v1
                 throw;
             }
         }
+
         [HttpGet("GetGameById{id}")]
         public Task<IActionResult> GetById(int id)
         {
@@ -44,6 +47,7 @@ namespace FIAP.FCG.WebApi.Controllers.v1
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("UpdateGame/{id:int}")]
         public Task<IActionResult> Put(int id, [FromBody] GameUpdateDto update)
         {
@@ -51,6 +55,7 @@ namespace FIAP.FCG.WebApi.Controllers.v1
             return TryMethodAsync(() => service.Update(id, update), logger);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("DeleteGame/{id:int}")]
         public Task<IActionResult> Delete(int id)
         {

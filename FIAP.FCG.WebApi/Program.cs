@@ -3,11 +3,13 @@ using FIAP.FCG.Application.Services;
 using FIAP.FCG.Infra.Context;
 using FIAP.FCG.Infra.Mapping;
 using FIAP.FCG.Infra.Repository;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using FIAP.FCG.WebApi.Extensions;
+using FIAP.FCG.WebApi.Middlewares;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -83,16 +85,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 			ValidateAudience = true,
 			ValidateLifetime = true,
 			ClockSkew = TimeSpan.Zero,
-
 			ValidIssuer = builder.Configuration["Jwt:Issuer"],
 			ValidAudience = builder.Configuration["Jwt:Audience"],
-			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
-		};
+			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+            RoleClaimType = ClaimTypes.Role
+        };
 	});
 
 var app = builder.Build();
 
-app.UseGlobalExceptionHandling();
+//app.UseGlobalExceptionHandling();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -100,8 +102,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
+
+app.UseMiddleware<ProblemDetailsExceptionMiddleware>();
+
 app.UseAuthorization();
 app.MapControllers();
 

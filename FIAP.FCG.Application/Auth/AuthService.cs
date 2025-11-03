@@ -4,11 +4,6 @@ using FIAP.FCG.Core.Validation;
 using FIAP.FCG.Core.Web;
 using FIAP.FCG.Infra.Repository;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
-using System.Net;
-using System.Security.Claims;
-using System.Text;
 
 namespace FIAP.FCG.Application.Auth
 {
@@ -32,7 +27,9 @@ namespace FIAP.FCG.Application.Auth
             {
                 return Unauthorized<string>("Credenciais inválidas.");
             }
-			var token = _repository.GenerateToken(_configuration);
+
+            var token = _repository.GenerateToken(_configuration, user);
+
             return Ok(token);
         }
 
