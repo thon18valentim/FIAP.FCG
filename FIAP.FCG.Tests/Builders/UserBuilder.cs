@@ -8,9 +8,10 @@ namespace FIAP.FCG.Tests.Builders
         public static UserRegisterDto NewRegisterDto(
             string email = "user@mail.com",
             string cpf = "83432327048",
+            string address = "R. Teste",
             string password = "SenhaForte@123",
             string name = "User Test")
-            => new UserRegisterDto { Email = email, Cpf = cpf, Password = password, Name = name };
+            => new UserRegisterDto { Email = email, Cpf = cpf, Password = password, Name = name, Address = address };
 
         public static LoginDto NewLogin(string email, string password)
             => new LoginDto { Email = email, Password = password };
