@@ -22,10 +22,6 @@ namespace FIAP.FCG.Tests.Builders
             double price = 199.99)
             => new GameResponseDto(id, name, platform, publisherName, description, price, DateTime.UtcNow);
 
-
-        public static LoginDto NewLogin(string email, string password)
-            => new LoginDto { Email = email, Password = password };
-
         public static Game NewEntity(
             string name = "Game Test",
             string platform = "PC",

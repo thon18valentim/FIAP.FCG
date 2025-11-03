@@ -22,13 +22,13 @@ namespace FIAP.FCG.WebApi.Controllers.v1
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Register([FromBody] UserRegisterDto userRegisterRequestDto)
         {
-            //var response = await service.Register(userRegisterRequestDto);
+            var response = await service.Register(userRegisterRequestDto);
 
-            //if (response.StatusCode == HttpStatusCode.Created)
-            //    return Created(string.Empty, $"Usuário {response.ResultValue} cadastrado com sucesso!");
+            if (response.StatusCode == HttpStatusCode.Created)
+                return Created(string.Empty, $"Usuário {response.ResultValue} cadastrado com sucesso!");
 
-            //return StatusCode((int)response.StatusCode);
-            return await TryMethodAsync(() => service.Register(userRegisterRequestDto), logger);
+            return StatusCode((int)response.StatusCode);
+            //return await TryMethodAsync(() => service.Register(userRegisterRequestDto), logger);
         }
     }
 }

@@ -19,7 +19,14 @@ namespace FIAP.FCG.Application.Auth
 
         public async Task<IApiResponse<string>> Login(LoginDto dto)
 		{
-            DtoValidator.ValidateObject(dto);
+            try
+            {
+                DtoValidator.ValidateObject(dto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest<string>($"Dados de login inválidos: {ex.Message}");
+            }
             var user = await _repository.FindByCredentialsAsync(dto);
             if (user == null)
             {
@@ -31,7 +38,14 @@ namespace FIAP.FCG.Application.Auth
 
         public async Task<IApiResponse<int>> Register(UserRegisterDto dto) 
         {
-            DtoValidator.ValidateObject(dto);
+            try
+            {
+                DtoValidator.ValidateObject(dto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest<int>($"Dados de registro inválidos: {ex.Message}");
+            }
             var id = await _repository.Create(dto);
             return Created(id, "Usuário registrado com sucesso.");
         }

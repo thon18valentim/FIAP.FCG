@@ -7,7 +7,7 @@ namespace FIAP.FCG.Tests.Builders
     {
         public static UserRegisterDto NewRegisterDto(
             string email = "user@mail.com",
-            string cpf = "12345678909",
+            string cpf = "83432327048",
             string password = "SenhaForte@123",
             string name = "User Test")
             => new UserRegisterDto { Email = email, Cpf = cpf, Password = password, Name = name };
@@ -17,7 +17,7 @@ namespace FIAP.FCG.Tests.Builders
 
         public static User NewEntity(
             string email = "user@mail.com",
-            string cpf = "12345678909",
+            string cpf = "83432327048",
             string address = "R. Teste",
             string passwordHash = "HASH",
             string name = "User Test")

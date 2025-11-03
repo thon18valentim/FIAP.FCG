@@ -3,6 +3,7 @@ using FIAP.FCG.Core.Models;
 using FIAP.FCG.Core.Validation;
 using FIAP.FCG.Core.Web;
 using FIAP.FCG.Infra.Repository;
+using System.ComponentModel.DataAnnotations;
 
 namespace FIAP.FCG.Application.Services
 {
@@ -11,7 +12,15 @@ namespace FIAP.FCG.Application.Services
         private readonly IGameRepository _repository = repository;
         public async Task<IApiResponse<int>> Create(GameRegisterDto gameRegisterDto)
         {
-            DtoValidator.ValidateObject(gameRegisterDto);
+            try
+            {
+                DtoValidator.ValidateObject(gameRegisterDto);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest<int>($"Dados de jogo inválidos: {ex.Message}");
+            }
+            
             var id = await _repository.Create(gameRegisterDto);
             return Created(id, "Jogo registrado com sucesso.");
         }

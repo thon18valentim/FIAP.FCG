@@ -11,12 +11,12 @@ namespace FIAP.FCG.Core.Inputs
         public string? Platform { get; init; } = default!;
 
         [Required, MinLength(2)]
-        public required string PublisherName { get; init; } = default!;
+        public string? PublisherName { get; init; } = default!;
 
         [Required, MinLength(2), MaxLength(100)]
-        public required string Description { get; init; } = default!;
+        public string? Description { get; init; } = default!;
 
         [Required, Range(0.01, double.MaxValue, ErrorMessage = "Preço deve ser maior que zero.")]
-        public double Price { get; init; } = default!;
+        public double? Price { get; init; } = default!;
     }
 }

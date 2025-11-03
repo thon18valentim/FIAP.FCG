@@ -1,90 +1,54 @@
-﻿using FIAP.FCG.Core.Inputs;
-using FIAP.FCG.Tests._TestDoubles;
-using FIAP.FCG.WebApi.Controllers.v1;
+﻿// tests/Controllers/StandardController_TryMethodAsync_Tests.cs
+using System.ComponentModel.DataAnnotations;
+using System.Net;
 using FIAP.FCG.Core.Web;
+using FIAP.FCG.WebApi.Controllers.v1;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Net;
+using Xunit;
 
-namespace FIAP.FCG.Tests.WebApi.Users;
+namespace FIAP.FCG.Tests.Controllers;
 
-public class StandardControllerTests
+public class StandardController_TryMethodAsync_Tests
 {
-    // Fake controller que expõe um método público para testar TryMethodAsync
     private sealed class FakeController : StandardController
     {
         private readonly ILogger _logger;
-        public FakeController(ILogger logger) => _logger = logger;
-
-        public Task<IActionResult> CallAsync<T>(Func<Task<IApiResponse<T>>> fn)
-            => TryMethodAsync(fn, _logger);
+        public FakeController(ILogger logger) { _logger = logger; }
+        public Task<IActionResult> CallAsync<T>(Func<Task<IApiResponse<T>>> f) => TryMethodAsync(f, _logger);
     }
 
-    private static FakeController Create(out DefaultHttpContext http)
+    private static FakeController Create(out Mock<ILogger> loggerMock)
     {
-        var logger = new Mock<ILogger>().Object;
-        var ctrl = new FakeController(logger);
-        http = new DefaultHttpContext();
+        loggerMock = new Mock<ILogger>();
+        var ctrl = new FakeController(loggerMock.Object);
+        // Necessário para popular problem.Extensions["traceId"]
+        var http = new DefaultHttpContext();
         ctrl.ControllerContext = new ControllerContext { HttpContext = http };
         return ctrl;
     }
 
-    [Fact(DisplayName = "TryMethodAsync: Return 200 + Body")]
-    public async Task TryMethodAsync_DevePropagar200EBody()
+    private sealed class TestResponse<T> : IApiResponse<T>
     {
-        var ctrl = Create(out _);
+        public bool IsSuccess { get; set; }
+        public HttpStatusCode StatusCode { get; set; }
+        public string Message { get; set; } = "";
+        public T? ResultValue { get; set; }
 
-        var response = TestApiResponse<UserResponseDto>.Ok(
-            new UserResponseDto(10, "Ana", "ana@fcg.com", "Rua 1", "12345678901", DateTime.UtcNow));
-
-        var result = await ctrl.CallAsync(() => Task.FromResult<IApiResponse<UserResponseDto>>(response));
-
-        var obj = result as ObjectResult;
-        obj.Should().NotBeNull();
-        obj!.StatusCode.Should().Be((int)HttpStatusCode.OK);
-        obj.Value.Should().BeSameAs(response);
+        public static TestResponse<T> Ok(T value) => new() { IsSuccess = true, StatusCode = HttpStatusCode.OK, ResultValue = value };
+        public static TestResponse<T> NoContent() => new() { IsSuccess = true, StatusCode = HttpStatusCode.NoContent };
+        public static TestResponse<T> Fail(HttpStatusCode code, string msg = "") => new() { IsSuccess = false, StatusCode = code, Message = msg };
     }
 
-    [Fact(DisplayName = "TryMethodAsync: Return 201 + Body")]
-    public async Task TryMethodAsync_DevePropagar201EBody()
-    {
-        var ctrl = Create(out _);
-
-        var created = TestApiResponse<UserResponseDto>.Created(
-            new UserResponseDto(11, "Bia", "bia@fcg.com", "Rua 2", "10987654321", DateTime.UtcNow));
-
-        var result = await ctrl.CallAsync(() => Task.FromResult<IApiResponse<UserResponseDto>>(created));
-
-        var obj = result as ObjectResult;
-        obj.Should().NotBeNull();
-        obj!.StatusCode.Should().Be((int)HttpStatusCode.Created);
-        obj.Value.Should().BeSameAs(created);
-    }
-
-    [Fact(DisplayName = "TryMethodAsync: Return 404")]
-    public async Task TryMethodAsync_DevePropagar404()
-    {
-        var ctrl = Create(out _);
-
-        var notFound = TestApiResponse<UserResponseDto>.NotFound("Usuário não encontrado");
-
-        var result = await ctrl.CallAsync(() => Task.FromResult<IApiResponse<UserResponseDto>>(notFound));
-
-        var obj = result as ObjectResult;
-        obj.Should().NotBeNull();
-        obj!.StatusCode.Should().Be((int)HttpStatusCode.NotFound);
-        obj.Value.Should().BeSameAs(notFound);
-    }
-
-    [Fact(DisplayName = "TryMethodAsync: Return 500 + Excecao")]
+    [Fact(DisplayName = "TryMethodAsync: Return 500 + ProblemDetails")]
     public async Task TryMethodAsync_DeveRetornar500_EmExcecao()
     {
         var ctrl = Create(out _);
 
-        var result = await ctrl.CallAsync<UserResponseDto>(() => throw new Exception("boom"));
+        var result = await ctrl.CallAsync<string>(() => throw new Exception("boom"));
 
         var obj = result as ObjectResult;
         obj.Should().NotBeNull();
@@ -92,6 +56,104 @@ public class StandardControllerTests
 
         var problem = obj.Value as ProblemDetails;
         problem.Should().NotBeNull();
-        problem!.Title.Should().Be("Erro interno no servidor");
+        problem!.Title.Should().Be("Erro");                  // << Atualizado conforme ToDefaultTitle
+        problem.Status.Should().Be(StatusCodes.Status500InternalServerError);
+        problem.Detail.Should().Be("boom");                  // detail usa ex.Message
+        problem.Extensions.ContainsKey("traceId").Should().BeTrue();
+        problem.Extensions["traceId"].Should().NotBeNull();
+    }
+
+    [Fact(DisplayName = "TryMethodAsync: 204 NoContent sem body")]
+    public async Task TryMethodAsync_DeveRetornar204_SemBody()
+    {
+        var ctrl = Create(out _);
+
+        var result = await ctrl.CallAsync<object>(() => Task.FromResult<IApiResponse<object>>(TestResponse<object>.NoContent()));
+
+        result.Should().BeOfType<StatusCodeResult>();
+        (result as StatusCodeResult)!.StatusCode.Should().Be(StatusCodes.Status204NoContent);
+    }
+
+    [Fact(DisplayName = "TryMethodAsync: BadRequest (ValidationException)")]
+    public async Task TryMethodAsync_BadRequest_ValidationException()
+    {
+        var ctrl = Create(out _);
+
+        var result = await ctrl.CallAsync<object>(() => throw new ValidationException("dados inválidos"));
+
+        var obj = result as ObjectResult;
+        obj!.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+        var problem = obj.Value as ProblemDetails;
+        problem!.Title.Should().Be("Requisição inválida");
+        problem.Detail.Should().Be("dados inválidos");
+    }
+
+    [Fact(DisplayName = "TryMethodAsync: Unauthorized")]
+    public async Task TryMethodAsync_Unauthorized()
+    {
+        var ctrl = Create(out _);
+
+        var result = await ctrl.CallAsync<object>(() => throw new UnauthorizedAccessException("sem permissão"));
+
+        var obj = result as ObjectResult;
+        obj!.StatusCode.Should().Be(StatusCodes.Status401Unauthorized);
+        var problem = obj.Value as ProblemDetails;
+        problem!.Title.Should().Be("Não autorizado");
+        problem.Detail.Should().Be("sem permissão");
+    }
+
+    [Fact(DisplayName = "TryMethodAsync: NotFound (KeyNotFoundException)")]
+    public async Task TryMethodAsync_NotFound()
+    {
+        var ctrl = Create(out _);
+
+        var result = await ctrl.CallAsync<object>(() => throw new KeyNotFoundException("não achei"));
+
+        var obj = result as ObjectResult;
+        obj!.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        var problem = obj.Value as ProblemDetails;
+        problem!.Title.Should().Be("Recurso não encontrado");
+        problem.Detail.Should().Be("não achei");
+    }
+
+    [Fact(DisplayName = "TryMethodAsync: Conflict (DbUpdateException)")]
+    public async Task TryMethodAsync_Conflict_DbUpdateException()
+    {
+        var ctrl = Create(out _);
+
+        var dbEx = new Microsoft.EntityFrameworkCore.DbUpdateException("violação de unicidade");
+        var result = await ctrl.CallAsync<object>(() => throw dbEx);
+
+        var obj = result as ObjectResult;
+        obj!.StatusCode.Should().Be(StatusCodes.Status409Conflict);
+        var problem = obj.Value as ProblemDetails;
+        problem!.Title.Should().Be("Conflito");
+        problem.Detail.Should().Be("violação de unicidade");
+    }
+
+    [Fact(DisplayName = "TryMethodAsync: Propaga sucesso 200 com body de IApiResponse")]
+    public async Task TryMethodAsync_SucessoComBody()
+    {
+        var ctrl = Create(out _);
+
+        var response = TestResponse<string>.Ok("ok");
+        var result = await ctrl.CallAsync<string>(() => Task.FromResult<IApiResponse<string>>(response));
+
+        var obj = result as ObjectResult;
+        obj!.StatusCode.Should().Be(StatusCodes.Status200OK);
+        obj.Value.Should().BeSameAs(response);
+    }
+
+    [Fact(DisplayName = "TryMethodAsync: Propaga erro custom do service (ex: 422)")]
+    public async Task TryMethodAsync_PropagaErroService()
+    {
+        var ctrl = Create(out _);
+
+        var response = TestResponse<string>.Fail((HttpStatusCode)422, "entidade inválida");
+        var result = await ctrl.CallAsync<string>(() => Task.FromResult<IApiResponse<string>>(response));
+
+        var obj = result as ObjectResult;
+        obj!.StatusCode.Should().Be(422);
+        obj.Value.Should().BeSameAs(response);
     }
 }

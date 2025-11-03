@@ -48,8 +48,8 @@ public class AuthLocalDbTests : IDisposable
     }
 
     [Theory(DisplayName = "Register → Created")]
-    [InlineData("alice@mail.com", "12345678909", "SenhaForte@123", "Alice", "R. Alice")]
-    [InlineData("bob@mail.com", "98765432100", "OutraForte#987", "Bob", "R. Bob")]
+    [InlineData("alice@mail.com", "83432327048", "SenhaForte@123", "Alice", "R. Alice")]
+    [InlineData("bob@mail.com", "31722086050", "OutraForte#987", "Bob", "R. Bob")]
     public async Task Register_Created(string email, string cpf, string password, string name, string address)
     {
         var resp = await _service.Register(new UserRegisterDto
@@ -70,8 +70,8 @@ public class AuthLocalDbTests : IDisposable
     }
 
     [Theory(DisplayName = "Login → sucesso retorna token")]
-    [InlineData("log1@mail.com", "12312312312", "SenhaForte@123", "User 1", "R. Teste 1")]
-    [InlineData("log2@mail.com", "78978978978", "OutraForte#987", "User 2", "R. Teste 2")]
+    [InlineData("log1@mail.com", "83432327048", "SenhaForte@123", "User 1", "R. Teste 1")]
+    [InlineData("log2@mail.com", "31722086050", "OutraForte#987", "User 2", "R. Teste 2")]
     public async Task Login_Success(string email, string cpf, string password, string name, string address)
     {
         (await _service.Register(new UserRegisterDto { Email = email, Cpf = cpf, Password = password, Name = name, Address = address }))
@@ -93,7 +93,7 @@ public class AuthLocalDbTests : IDisposable
         (await _service.Register(new UserRegisterDto
         {
             Email = "log3@mail.com",
-            Cpf = "32132132132",
+            Cpf = "83432327048",
             Password = "SenhaCorreta@123",
             Address = "R. Teste",
             Name = "User3"
