@@ -1,4 +1,4 @@
-# FIAP.FCG 🚀  
+# FIAP.FCG - Grupo 58 🚀  
 **“Construindo a plataforma de Cloud Gaming da FIAP”**
 
 [![.NET](https://img.shields.io/badge/Framework-.NET-8.svg?style=for-the-badge&logoColor=white)](https://dotnet.microsoft.com/)
